@@ -1,27 +1,24 @@
-from typing import Any, Dict, List, Optional
+import re
+from typing import Any, Optional
 
-def validate_schema(data: Any, schema: Dict[str, type]) -> bool:
-    if not isinstance(data, dict):
-        return False
-    return all(isinstance(data.get(k), v) for k, v in schema.items())
+EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')
 
-def sanitize_input(data: str, strip_chars: str = "\n\t\r") -> str:
-    return data.strip(strip_chars)
+def validate_email(email: str) -> bool:
+    return bool(EMAIL_REGEX.match(email))
 
-def ensure_list(data: Any) -> List[Any]:
-    if isinstance(data, list):
-        return data
-    return [data] if data is not None else []
-
-def validate_range(value: float, min_val: float, max_val: float) -> bool:
+def validate_range(value: int, min_val: int, max_val: int) -> bool:
     return min_val <= value <= max_val
 
-def flatten_dict(data: Dict[str, Any], parent_key: str = '', sep: str = '_') -> Dict[str, Any]:
-    items = []
-    for k, v in data.items():
-        new_key = f"{parent_key}{sep}{k}" if parent_key else k
-        if isinstance(v, dict):
-            items.extend(flatten_dict(v, new_key, sep=sep).items())
-        else:
-            items.append((new_key, v))
-    return dict(items)
+def validate_not_empty(value: Optional[str]) -> bool:
+    return bool(value and value.strip())
+
+def sanitize_input(value: Any) -> str:
+    if not isinstance(value, str):
+        value = str(value)
+    return value.strip()
+
+def validate_length(value: str, min_len: int, max_len: int) -> bool:
+    return min_len <= len(value) <= max_len
+
+def validate_alphanumeric(value: str) -> bool:
+    return value.isalnum()
